@@ -1,0 +1,6 @@
+{
+  "name": "VIORA — Ultimate Music Player",
+  "description": "Premium music player with Spotify-style music video playback, live ambient context, real-time clock, Open-Meteo weather intelligence, advanced equalizer, time-synced lyrics, visualizers, and local library support.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

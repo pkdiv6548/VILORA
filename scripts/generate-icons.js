@@ -1,0 +1,405 @@
+import sharp from "sharp";
+import fs from "fs";
+import path from "path";
+
+const ICONS_DIR = path.resolve("public/icons");
+if (!fs.existsSync(ICONS_DIR)) {
+  fs.mkdirSync(ICONS_DIR, { recursive: true });
+}
+
+// 1. Master Icon SVG (512x512) — Exact representation of VIORA neon equalizer squircle with 3D play button
+const masterSvg = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Obsidian Canvas -->
+    <radialGradient id="vioraBg" cx="50%" cy="46%" r="65%">
+      <stop offset="0%" stop-color="#0a0e24" />
+      <stop offset="55%" stop-color="#050714" />
+      <stop offset="100%" stop-color="#010206" />
+    </radialGradient>
+
+    <!-- Neon Rim Gradient for Squircle -->
+    <linearGradient id="neonRim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f0ff" />
+      <stop offset="25%" stop-color="#0072ff" />
+      <stop offset="50%" stop-color="#7928ca" />
+      <stop offset="78%" stop-color="#d946ef" />
+      <stop offset="100%" stop-color="#ff007a" />
+    </linearGradient>
+
+    <linearGradient id="neonRimGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(0, 240, 255, 0.45)" />
+      <stop offset="50%" stop-color="rgba(121, 40, 202, 0.45)" />
+      <stop offset="100%" stop-color="rgba(255, 0, 122, 0.45)" />
+    </linearGradient>
+
+    <!-- Play Button Luminous Gradient -->
+    <linearGradient id="playBtnGrad" x1="0%" y1="20%" x2="100%" y2="80%">
+      <stop offset="0%" stop-color="#00f5ff" />
+      <stop offset="35%" stop-color="#3b82f6" />
+      <stop offset="70%" stop-color="#a855f7" />
+      <stop offset="100%" stop-color="#ff2e93" />
+    </linearGradient>
+
+    <!-- Play Button Specular Highlight -->
+    <linearGradient id="playBtnShine" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255, 255, 255, 0.75)" />
+      <stop offset="45%" stop-color="rgba(255, 255, 255, 0.15)" />
+      <stop offset="100%" stop-color="rgba(255, 255, 255, 0.0)" />
+    </linearGradient>
+
+    <!-- Bar Gradients across 11 columns -->
+    <linearGradient id="barGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00f5ff" />
+      <stop offset="100%" stop-color="#0099ff" />
+    </linearGradient>
+    <linearGradient id="barGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00e5ff" />
+      <stop offset="100%" stop-color="#0080ff" />
+    </linearGradient>
+    <linearGradient id="barGrad3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00ccff" />
+      <stop offset="100%" stop-color="#0066ff" />
+    </linearGradient>
+    <linearGradient id="barGrad4" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1ea0ff" />
+      <stop offset="100%" stop-color="#3b66ff" />
+    </linearGradient>
+    <linearGradient id="barGrad5" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6488ff" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+    <linearGradient id="barGrad6" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#9d5bfb" />
+      <stop offset="100%" stop-color="#a855f7" />
+    </linearGradient>
+    <linearGradient id="barGrad7" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#c054f8" />
+      <stop offset="100%" stop-color="#c026d3" />
+    </linearGradient>
+    <linearGradient id="barGrad8" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#db48f5" />
+      <stop offset="100%" stop-color="#d946ef" />
+    </linearGradient>
+    <linearGradient id="barGrad9" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f044dc" />
+      <stop offset="100%" stop-color="#e11d8b" />
+    </linearGradient>
+    <linearGradient id="barGrad10" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f844b8" />
+      <stop offset="100%" stop-color="#ec4899" />
+    </linearGradient>
+    <linearGradient id="barGrad11" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff479c" />
+      <stop offset="100%" stop-color="#f43f5e" />
+    </linearGradient>
+
+    <!-- Glow & Shadow Filters -->
+    <filter id="outerHalo" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="softBarGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="playShadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.85" />
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+  </defs>
+
+  <!-- Deep Black Backdrop -->
+  <rect width="512" height="512" fill="#020308" />
+
+  <!-- Outer Neon Halo Glow -->
+  <rect x="42" y="42" width="428" height="428" rx="114" fill="none" stroke="url(#neonRimGlow)" stroke-width="18" filter="url(#outerHalo)" opacity="0.85" />
+
+  <!-- Squircle Glass Card Surface -->
+  <rect x="44" y="44" width="424" height="424" rx="112" fill="url(#vioraBg)" />
+  
+  <!-- Subtle Internal Glow Mesh -->
+  <circle cx="160" cy="180" r="140" fill="#00d2ff" opacity="0.08" filter="url(#outerHalo)" />
+  <circle cx="350" cy="340" r="150" fill="#d946ef" opacity="0.09" filter="url(#outerHalo)" />
+
+  <!-- Squircle Neon Rim Stroke -->
+  <rect x="44" y="44" width="424" height="424" rx="112" fill="none" stroke="url(#neonRim)" stroke-width="5" />
+
+  <!-- Equalizer Rhombus Waveform Bars (11 bars centered at X=256, Y=256) -->
+  <g filter="url(#softBarGlow)">
+    <!-- Bar 1 (leftmost, cyan) -->
+    <rect x="88" y="235" width="22" height="42" rx="11" fill="url(#barGrad1)" />
+    <!-- Bar 2 -->
+    <rect x="122" y="213" width="22" height="86" rx="11" fill="url(#barGrad2)" />
+    <!-- Bar 3 -->
+    <rect x="156" y="181" width="22" height="150" rx="11" fill="url(#barGrad3)" />
+    <!-- Bar 4 -->
+    <rect x="190" y="146" width="22" height="220" rx="11" fill="url(#barGrad4)" />
+    <!-- Bar 5 -->
+    <rect x="224" y="121" width="22" height="270" rx="11" fill="url(#barGrad5)" />
+    <!-- Bar 6 (center, tallest) -->
+    <rect x="258" y="103" width="22" height="306" rx="11" fill="url(#barGrad6)" />
+    <!-- Bar 7 -->
+    <rect x="292" y="121" width="22" height="270" rx="11" fill="url(#barGrad7)" />
+    <!-- Bar 8 -->
+    <rect x="326" y="146" width="22" height="220" rx="11" fill="url(#barGrad8)" />
+    <!-- Bar 9 -->
+    <rect x="360" y="181" width="22" height="150" rx="11" fill="url(#barGrad9)" />
+    <!-- Bar 10 -->
+    <rect x="394" y="213" width="22" height="86" rx="11" fill="url(#barGrad10)" />
+    <!-- Bar 11 (rightmost, magenta) -->
+    <rect x="428" y="235" width="22" height="42" rx="11" fill="url(#barGrad11)" />
+  </g>
+
+  <!-- Specular 3D Lighting Accent on Bars -->
+  <g opacity="0.45">
+    <rect x="91" y="238" width="6" height="36" rx="3" fill="#ffffff" />
+    <rect x="125" y="216" width="6" height="80" rx="3" fill="#ffffff" />
+    <rect x="159" y="184" width="6" height="144" rx="3" fill="#ffffff" />
+    <rect x="193" y="149" width="6" height="214" rx="3" fill="#ffffff" />
+    <rect x="227" y="124" width="6" height="264" rx="3" fill="#ffffff" />
+    <rect x="261" y="106" width="6" height="300" rx="3" fill="#ffffff" />
+    <rect x="295" y="124" width="6" height="264" rx="3" fill="#ffffff" />
+    <rect x="329" y="149" width="6" height="214" rx="3" fill="#ffffff" />
+    <rect x="363" y="184" width="6" height="144" rx="3" fill="#ffffff" />
+    <rect x="397" y="216" width="6" height="80" rx="3" fill="#ffffff" />
+    <rect x="431" y="238" width="6" height="36" rx="3" fill="#ffffff" />
+  </g>
+
+  <!-- Ambient Occlusion Shadow for Play Button -->
+  <ellipse cx="270" cy="262" rx="72" ry="76" fill="#000000" opacity="0.65" filter="url(#outerHalo)" />
+
+  <!-- Center 3D Play Button Triangle with Rounded Vertices -->
+  <!-- Triangle Coordinates: Left top (208, 192), Left bottom (208, 320), Right apex (328, 256) -->
+  <g filter="url(#playShadow)">
+    <path d="M 224 195 C 211 187 200 194 200 210 L 200 302 C 200 318 211 325 224 317 L 305 271 C 318 263 318 249 305 241 Z"
+          fill="url(#playBtnGrad)" />
+    
+    <!-- Specular Bevel Overlay -->
+    <path d="M 224 195 C 211 187 200 194 200 210 L 200 302 C 200 318 211 325 224 317 L 305 271 C 318 263 318 249 305 241 Z"
+          fill="url(#playBtnShine)" />
+
+    <!-- Crisp Soft Rim Stroke on Play Button -->
+    <path d="M 224 195 C 211 187 200 194 200 210 L 200 302 C 200 318 211 325 224 317 L 305 271 C 318 263 318 249 305 241 Z"
+          fill="none" stroke="rgba(255, 255, 255, 0.4)" stroke-width="2" />
+  </g>
+</svg>
+`;
+
+// 2. Maskable Icon SVG (512x512) — Full-bleed background with emblem scaled inside Android safe zone (central 74%)
+const maskableSvg = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Full-bleed background for Android adaptive shapes -->
+    <radialGradient id="vioraBgM" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#0a0e24" />
+      <stop offset="55%" stop-color="#050714" />
+      <stop offset="100%" stop-color="#010206" />
+    </radialGradient>
+
+    <!-- Neon Rim Gradient for Squircle -->
+    <linearGradient id="neonRimM" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f0ff" />
+      <stop offset="25%" stop-color="#0072ff" />
+      <stop offset="50%" stop-color="#7928ca" />
+      <stop offset="78%" stop-color="#d946ef" />
+      <stop offset="100%" stop-color="#ff007a" />
+    </linearGradient>
+
+    <linearGradient id="neonRimGlowM" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(0, 240, 255, 0.5)" />
+      <stop offset="50%" stop-color="rgba(121, 40, 202, 0.5)" />
+      <stop offset="100%" stop-color="rgba(255, 0, 122, 0.5)" />
+    </linearGradient>
+
+    <!-- Play Button Luminous Gradient -->
+    <linearGradient id="playBtnGradM" x1="0%" y1="20%" x2="100%" y2="80%">
+      <stop offset="0%" stop-color="#00f5ff" />
+      <stop offset="35%" stop-color="#3b82f6" />
+      <stop offset="70%" stop-color="#a855f7" />
+      <stop offset="100%" stop-color="#ff2e93" />
+    </linearGradient>
+
+    <linearGradient id="playBtnShineM" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255, 255, 255, 0.75)" />
+      <stop offset="45%" stop-color="rgba(255, 255, 255, 0.15)" />
+      <stop offset="100%" stop-color="rgba(255, 255, 255, 0.0)" />
+    </linearGradient>
+
+    <!-- Bar Gradients across 11 columns -->
+    <linearGradient id="barGrad1M" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00f5ff" /><stop offset="100%" stop-color="#0099ff" />
+    </linearGradient>
+    <linearGradient id="barGrad2M" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00e5ff" /><stop offset="100%" stop-color="#0080ff" />
+    </linearGradient>
+    <linearGradient id="barGrad3M" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00ccff" /><stop offset="100%" stop-color="#0066ff" />
+    </linearGradient>
+    <linearGradient id="barGrad4M" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1ea0ff" /><stop offset="100%" stop-color="#3b66ff" />
+    </linearGradient>
+    <linearGradient id="barGrad5M" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6488ff" /><stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+    <linearGradient id="barGrad6M" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#9d5bfb" /><stop offset="100%" stop-color="#a855f7" />
+    </linearGradient>
+    <linearGradient id="barGrad7M" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#c054f8" /><stop offset="100%" stop-color="#c026d3" />
+    </linearGradient>
+    <linearGradient id="barGrad8M" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#db48f5" /><stop offset="100%" stop-color="#d946ef" />
+    </linearGradient>
+    <linearGradient id="barGrad9M" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f044dc" /><stop offset="100%" stop-color="#e11d8b" />
+    </linearGradient>
+    <linearGradient id="barGrad10M" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f844b8" /><stop offset="100%" stop-color="#ec4899" />
+    </linearGradient>
+    <linearGradient id="barGrad11M" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff479c" /><stop offset="100%" stop-color="#f43f5e" />
+    </linearGradient>
+
+    <filter id="outerHaloM" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="softBarGlowM" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="playShadowM" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.85" />
+    </filter>
+  </defs>
+
+  <!-- Full-bleed background -->
+  <rect width="512" height="512" fill="url(#vioraBgM)" />
+
+  <!-- Scaled Emblem inside 72% Safe Zone for Android Adaptive Icon -->
+  <g transform="translate(256, 256) scale(0.74) translate(-256, -256)">
+    <!-- Outer Neon Halo Glow -->
+    <rect x="42" y="42" width="428" height="428" rx="114" fill="none" stroke="url(#neonRimGlowM)" stroke-width="20" filter="url(#outerHaloM)" opacity="0.9" />
+
+    <!-- Squircle Glass Card Surface -->
+    <rect x="44" y="44" width="424" height="424" rx="112" fill="#070a1c" />
+    <circle cx="160" cy="180" r="140" fill="#00d2ff" opacity="0.10" filter="url(#outerHaloM)" />
+    <circle cx="350" cy="340" r="150" fill="#d946ef" opacity="0.10" filter="url(#outerHaloM)" />
+
+    <!-- Squircle Neon Rim Stroke -->
+    <rect x="44" y="44" width="424" height="424" rx="112" fill="none" stroke="url(#neonRimM)" stroke-width="6" />
+
+    <!-- Equalizer Rhombus Waveform Bars -->
+    <g filter="url(#softBarGlowM)">
+      <rect x="88" y="235" width="22" height="42" rx="11" fill="url(#barGrad1M)" />
+      <rect x="122" y="213" width="22" height="86" rx="11" fill="url(#barGrad2M)" />
+      <rect x="156" y="181" width="22" height="150" rx="11" fill="url(#barGrad3M)" />
+      <rect x="190" y="146" width="22" height="220" rx="11" fill="url(#barGrad4M)" />
+      <rect x="224" y="121" width="22" height="270" rx="11" fill="url(#barGrad5M)" />
+      <rect x="258" y="103" width="22" height="306" rx="11" fill="url(#barGrad6M)" />
+      <rect x="292" y="121" width="22" height="270" rx="11" fill="url(#barGrad7M)" />
+      <rect x="326" y="146" width="22" height="220" rx="11" fill="url(#barGrad8M)" />
+      <rect x="360" y="181" width="22" height="150" rx="11" fill="url(#barGrad9M)" />
+      <rect x="394" y="213" width="22" height="86" rx="11" fill="url(#barGrad10M)" />
+      <rect x="428" y="235" width="22" height="42" rx="11" fill="url(#barGrad11M)" />
+    </g>
+
+    <g opacity="0.45">
+      <rect x="91" y="238" width="6" height="36" rx="3" fill="#ffffff" />
+      <rect x="125" y="216" width="6" height="80" rx="3" fill="#ffffff" />
+      <rect x="159" y="184" width="6" height="144" rx="3" fill="#ffffff" />
+      <rect x="193" y="149" width="6" height="214" rx="3" fill="#ffffff" />
+      <rect x="227" y="124" width="6" height="264" rx="3" fill="#ffffff" />
+      <rect x="261" y="106" width="6" height="300" rx="3" fill="#ffffff" />
+      <rect x="295" y="124" width="6" height="264" rx="3" fill="#ffffff" />
+      <rect x="329" y="149" width="6" height="214" rx="3" fill="#ffffff" />
+      <rect x="363" y="184" width="6" height="144" rx="3" fill="#ffffff" />
+      <rect x="397" y="216" width="6" height="80" rx="3" fill="#ffffff" />
+      <rect x="431" y="238" width="6" height="36" rx="3" fill="#ffffff" />
+    </g>
+
+    <!-- Play Button Occlusion Shadow -->
+    <ellipse cx="270" cy="262" rx="72" ry="76" fill="#000000" opacity="0.7" filter="url(#outerHaloM)" />
+
+    <!-- Center Play Button -->
+    <g filter="url(#playShadowM)">
+      <path d="M 224 195 C 211 187 200 194 200 210 L 200 302 C 200 318 211 325 224 317 L 305 271 C 318 263 318 249 305 241 Z"
+            fill="url(#playBtnGradM)" />
+      <path d="M 224 195 C 211 187 200 194 200 210 L 200 302 C 200 318 211 325 224 317 L 305 271 C 318 263 318 249 305 241 Z"
+            fill="url(#playBtnShineM)" />
+      <path d="M 224 195 C 211 187 200 194 200 210 L 200 302 C 200 318 211 325 224 317 L 305 271 C 318 263 318 249 305 241 Z"
+            fill="none" stroke="rgba(255, 255, 255, 0.4)" stroke-width="2.5" />
+    </g>
+  </g>
+</svg>
+`;
+
+async function buildIcons() {
+  console.log("Generating high-definition VIORA PWA icons from exact reference design...");
+
+  // Write master SVG files
+  fs.writeFileSync("public/icon.svg", masterSvg.trim());
+  fs.writeFileSync("public/icons/icon.svg", masterSvg.trim());
+  fs.writeFileSync("public/icons/icon-maskable.svg", maskableSvg.trim());
+
+  const masterBuf = Buffer.from(masterSvg);
+  const maskableBuf = Buffer.from(maskableSvg);
+
+  // 1. icon-192.png (Standard 192x192)
+  await sharp(masterBuf)
+    .resize(192, 192)
+    .png()
+    .toFile("public/icons/icon-192.png");
+  console.log("✓ Created public/icons/icon-192.png");
+
+  // 2. icon-512.png (Standard 512x512)
+  await sharp(masterBuf)
+    .resize(512, 512)
+    .png()
+    .toFile("public/icons/icon-512.png");
+  console.log("✓ Created public/icons/icon-512.png");
+
+  // 3. icon-maskable-192.png (Android adaptive/maskable with safe zone)
+  await sharp(maskableBuf)
+    .resize(192, 192)
+    .png()
+    .toFile("public/icons/icon-maskable-192.png");
+  console.log("✓ Created public/icons/icon-maskable-192.png");
+
+  // 4. icon-maskable-512.png (Android adaptive/maskable with safe zone)
+  await sharp(maskableBuf)
+    .resize(512, 512)
+    .png()
+    .toFile("public/icons/icon-maskable-512.png");
+  console.log("✓ Created public/icons/icon-maskable-512.png");
+
+  // 5. apple-touch-icon.png (180x180 for iOS Safari home screen)
+  await sharp(masterBuf)
+    .resize(180, 180)
+    .png()
+    .toFile("public/icons/apple-touch-icon.png");
+  await sharp(masterBuf)
+    .resize(180, 180)
+    .png()
+    .toFile("public/apple-touch-icon.png");
+  console.log("✓ Created public/apple-touch-icon.png & public/icons/apple-touch-icon.png");
+
+  // 6. favicon-32x32.png
+  await sharp(masterBuf)
+    .resize(32, 32)
+    .png()
+    .toFile("public/favicon-32x32.png");
+  console.log("✓ Created public/favicon-32x32.png");
+
+  console.log("All VIORA PWA icons generated successfully!");
+}
+
+buildIcons().catch(err => {
+  console.error("Error generating icons:", err);
+  process.exit(1);
+});

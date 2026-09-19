@@ -1,0 +1,789 @@
+/* Ambient Context System CSS: Header Widget, Home Soundscape Card, Modal Dialog, and City Selector */
+
+/* 1. Header Ambient Pill */
+.ambient-header-pill-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.ambient-header-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: var(--color-text-primary);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.ambient-header-pill:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
+}
+
+.ambient-header-pill:active {
+  transform: translateY(0);
+}
+
+.ambient-header-pill.offline {
+  border-color: rgba(255, 159, 10, 0.4);
+}
+
+.ambient-pill-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffb300;
+}
+
+.ambient-pill-temp {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.ambient-pill-separator {
+  color: var(--color-text-dim);
+  font-size: 0.7rem;
+}
+
+.ambient-pill-time {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+}
+
+.ambient-pill-city {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ambient-pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+/* Light Mode Overrides for Header Pill */
+:root[data-theme="light"] .ambient-header-pill,
+[data-theme="light"] .ambient-header-pill {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #111827;
+}
+
+:root[data-theme="light"] .ambient-header-pill:hover,
+[data-theme="light"] .ambient-header-pill:hover {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.16);
+}
+
+/* 2. Home Soundscape Ambient Card */
+.ambient-home-card {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px;
+  border-radius: 20px;
+  margin-bottom: 28px;
+  background: linear-gradient(135deg, rgba(26, 30, 43, 0.85) 0%, rgba(14, 16, 23, 0.95) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  gap: 24px;
+}
+
+/* Dynamic Atmospheres */
+.ambient-home-card.atmosphere-day {
+  background: linear-gradient(135deg, rgba(255, 149, 0, 0.12) 0%, rgba(255, 45, 85, 0.06) 40%, rgba(14, 16, 23, 0.95) 100%);
+  border-color: rgba(255, 179, 0, 0.16);
+}
+
+.ambient-home-card.atmosphere-night {
+  background: linear-gradient(135deg, rgba(88, 86, 214, 0.15) 0%, rgba(30, 34, 54, 0.9) 50%, rgba(11, 12, 16, 0.98) 100%);
+  border-color: rgba(144, 202, 249, 0.12);
+}
+
+.ambient-home-card.atmosphere-rain {
+  background: linear-gradient(135deg, rgba(0, 122, 255, 0.14) 0%, rgba(15, 30, 50, 0.9) 50%, rgba(11, 14, 20, 0.98) 100%);
+  border-color: rgba(0, 191, 255, 0.15);
+}
+
+/* Light Mode Card Atmospheres */
+:root[data-theme="light"] .ambient-home-card,
+[data-theme="light"] .ambient-home-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f4f6fa 100%);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+:root[data-theme="light"] .ambient-home-card.atmosphere-day,
+[data-theme="light"] .ambient-home-card.atmosphere-day {
+  background: linear-gradient(135deg, #fff9f0 0%, #ffffff 60%, #f7f8fc 100%);
+  border-color: rgba(255, 179, 0, 0.25);
+}
+
+:root[data-theme="light"] .ambient-home-card.atmosphere-night,
+[data-theme="light"] .ambient-home-card.atmosphere-night {
+  background: linear-gradient(135deg, #f0f3ff 0%, #ffffff 60%, #f4f6fa 100%);
+  border-color: rgba(88, 86, 214, 0.18);
+}
+
+:root[data-theme="light"] .ambient-home-card.atmosphere-rain,
+[data-theme="light"] .ambient-home-card.atmosphere-rain {
+  background: linear-gradient(135deg, #eef7ff 0%, #ffffff 60%, #f4f6fa 100%);
+  border-color: rgba(0, 122, 255, 0.2);
+}
+
+.ambient-card-glow {
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--color-accent-glow) 0%, transparent 70%);
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.ambient-card-left {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1;
+}
+
+.ambient-greeting-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ambient-greeting-tag {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-accent);
+}
+
+.ambient-dot-sep {
+  color: var(--color-text-dim);
+  font-size: 0.75rem;
+}
+
+.ambient-daydate {
+  font-size: 0.84rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.ambient-live-clock-row {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.ambient-live-time {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  color: var(--color-text-primary);
+}
+
+.ambient-mood-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 45, 85, 0.12);
+  border: 1px solid rgba(255, 45, 85, 0.25);
+  color: var(--color-accent);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.ambient-mood-emoji {
+  font-size: 0.95rem;
+}
+
+.ambient-mood-desc {
+  font-size: 0.88rem;
+  color: var(--color-text-secondary);
+  line-height: 1.45;
+  margin: 2px 0 6px;
+  max-width: 540px;
+}
+
+.ambient-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.ambient-explore-btn {
+  padding: 8px 18px !important;
+  font-size: 0.84rem !important;
+  border-radius: var(--radius-full) !important;
+}
+
+.ambient-details-btn {
+  padding: 8px 16px !important;
+  font-size: 0.84rem !important;
+  border-radius: var(--radius-full) !important;
+}
+
+/* Right Weather Metrics Block */
+.ambient-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.ambient-weather-primary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ambient-weather-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:root[data-theme="light"] .ambient-weather-icon-wrap,
+[data-theme="light"] .ambient-weather-icon-wrap {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.ambient-temp-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.ambient-big-temp {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--color-text-primary);
+}
+
+.ambient-condition-label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.ambient-location-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.ambient-location-chip:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="light"] .ambient-location-chip,
+[data-theme="light"] .ambient-location-chip {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #4b5563;
+}
+
+.ambient-mini-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  gap: 14px;
+  padding-top: 6px;
+}
+
+.ambient-mini-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.ambient-metric-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-dim);
+}
+
+.ambient-metric-val {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+/* 3. Ambient Modal Dialog Styling */
+.modal-box.ambient-modal-box {
+  max-width: 640px;
+  width: 100%;
+}
+
+.ambient-modal-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ambient-modal-hero {
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255, 45, 85, 0.1) 0%, rgba(140, 40, 255, 0.05) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="light"] .ambient-modal-hero,
+[data-theme="light"] .ambient-modal-hero {
+  background: linear-gradient(135deg, #fff0f3 0%, #f4f5fa 100%);
+  border-color: rgba(255, 45, 85, 0.15);
+}
+
+.ambient-modal-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ambient-modal-greeting {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-accent);
+}
+
+.ambient-unit-toggle-group {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme="light"] .ambient-unit-toggle-group,
+[data-theme="light"] .ambient-unit-toggle-group {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.ambient-unit-btn {
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.ambient-unit-btn.active {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.ambient-modal-clock {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  color: var(--color-text-primary);
+}
+
+.ambient-modal-daydate {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+.ambient-modal-weather-card {
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+:root[data-theme="light"] .ambient-modal-weather-card,
+[data-theme="light"] .ambient-modal-weather-card {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+.ambient-modal-weather-main {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.ambient-modal-icon-large {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ambient-modal-temp-val {
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.ambient-modal-condition-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-top: 4px;
+}
+
+.ambient-modal-feels-text {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.ambient-modal-location-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ambient-modal-location-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.ambient-modal-location-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ambient-sub-btn {
+  padding: 4px 10px !important;
+  font-size: 0.76rem !important;
+}
+
+/* 6-Point Weather Grid */
+.ambient-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.ambient-grid-card {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+:root[data-theme="light"] .ambient-grid-card,
+[data-theme="light"] .ambient-grid-card {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+.ambient-grid-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.ambient-grid-title {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  letter-spacing: 0.03em;
+}
+
+.ambient-grid-val {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-top: 2px;
+}
+
+/* Weather Mood Card in Modal */
+.ambient-modal-mood-card {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(255, 45, 85, 0.06);
+  border: 1px solid rgba(255, 45, 85, 0.15);
+}
+
+.ambient-mood-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.ambient-mood-main-tag {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-accent);
+}
+
+.ambient-mood-genre-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="light"] .ambient-mood-genre-tag,
+[data-theme="light"] .ambient-mood-genre-tag {
+  background: rgba(0, 0, 0, 0.06);
+  color: #1f2937;
+}
+
+.ambient-mood-detail-desc {
+  font-size: 0.84rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* 4. City Search & Selector */
+.city-search-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.city-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.city-search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.city-search-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 16px 0 38px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface-elevated);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+}
+
+.city-search-input:focus {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+.city-quick-picks {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.city-quick-chip {
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.city-quick-chip:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+:root[data-theme="light"] .city-quick-chip,
+[data-theme="light"] .city-quick-chip {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #111827;
+}
+
+.city-results-list {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.city-result-item {
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all var(--transition-fast);
+}
+
+.city-result-item:hover {
+  background: rgba(255, 45, 85, 0.12);
+  border-color: var(--color-accent);
+}
+
+/* 5. Responsive Behavior */
+@media (max-width: 900px) {
+  .ambient-home-card {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 18px 20px;
+    gap: 18px;
+  }
+
+  .ambient-card-right {
+    align-items: stretch;
+  }
+
+  .ambient-weather-primary {
+    justify-content: flex-start;
+  }
+
+  .ambient-mini-metrics {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .ambient-mini-metric {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .ambient-header-pill {
+    padding: 0 9px;
+    height: 32px;
+    font-size: 0.78rem;
+    gap: 5px;
+  }
+
+  .ambient-pill-city {
+    display: none !important;
+  }
+
+  .ambient-home-card {
+    padding: 16px 14px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+  }
+
+  .ambient-live-time {
+    font-size: 1.85rem;
+  }
+
+  .ambient-big-temp {
+    font-size: 1.85rem;
+  }
+
+  .ambient-mini-metrics {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .ambient-modal-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .ambient-modal-clock {
+    font-size: 1.95rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .ambient-header-pill {
+    padding: 0 7px;
+    font-size: 0.75rem;
+  }
+
+  .ambient-pill-separator {
+    display: none;
+  }
+
+  .ambient-modal-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>VIORA — Ultimate Music Player</title>
+    <meta name="description" content="Premium music player with Spotify-style music video playback, live ambient context, real-time clock, Open-Meteo weather intelligence, advanced equalizer, time-synced lyrics, visualizers, and local library support." />
+    <meta property="og:title" content="VIORA — Ultimate Music Player" />
+    <meta property="og:description" content="Premium music player with Spotify-style music video playback, live ambient context, real-time clock, Open-Meteo weather intelligence, advanced equalizer, time-synced lyrics, visualizers, and local library support." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#050714" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="VIORA" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- Google Fonts for High-Fidelity Hindi (Devanagari) Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- YouTube IFrame API is loaded dynamically on-demand by js/youtube-player.js -->
+
+    <!-- Immediate Safe Image Fallback Helper so early onerror events never throw -->
+    <script>
+      window.__vioraImgFallback = function(img, title) {
+        if (!img) return;
+        img.onerror = null;
+        img.src = "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22300%22%20height%3D%22300%22%20viewBox%3D%220%200%20300%20300%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%2300f0ff%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23d946ef%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%22150%22%20cy%3D%22130%22%20r%3D%2250%22%20fill%3D%22rgba(0%2C0%2C0%2C0.3)%22%2F%3E%3Cpolygon%20points%3D%22144%2C118%20144%2C142%20162%2C130%22%20fill%3D%22%23ffffff%22%2F%3E%3Ctext%20x%3D%22150%22%20y%3D%22225%22%20font-family%3D%22sans-serif%22%20font-size%3D%2216%22%20font-weight%3D%22700%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3EVIORA%3C%2Ftext%3E%3C%2Fsvg%3E";
+      };
+      window.__musiqImgFallback = window.__vioraImgFallback;
+    </script>
+
+    <!-- Critical Zero-FOUC & Anti-Overflow Protection -->
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: #0b0c10;
+        color: #f5f5f7;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        overflow: hidden;
+      }
+      #app-root {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+        background-color: #0b0c10;
+      }
+      svg {
+        display: inline-block;
+        vertical-align: middle;
+        flex-shrink: 0;
+      }
+      .nav-link svg, .mobile-nav-item svg {
+        width: 20px !important;
+        height: 20px !important;
+        max-width: 20px !important;
+        max-height: 20px !important;
+      }
+      .mobile-player-btn, .mobile-progress-bar {
+        display: none;
+      }
+      @media (max-width: 768px) {
+        #app-root {
+          grid-template-rows: auto minmax(0, 1fr) auto auto;
+          height: 100vh;
+          height: 100dvh;
+        }
+        .app-sidebar, .app-right-panel, .header-search-bar, .hide-on-mobile {
+          display: none !important;
+        }
+        .player-center {
+          display: none !important;
+        }
+        .player-badges {
+          display: none !important;
+        }
+        .mobile-player-btn {
+          display: inline-flex !important;
+        }
+        .app-main-body {
+          grid-template-columns: 1fr !important;
+          height: 100% !important;
+          min-height: 0 !important;
+          overflow: hidden !important;
+        }
+        .mobile-nav-bar {
+          display: flex !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- App Shell Container -->
+    <div id="app-root">
+      <!-- Top Application Header -->
+      <header class="app-header">
+        <div class="brand-section">
+          <div class="brand-logo" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+          </div>
+          <span class="brand-title">VIORA</span>
+          <span class="brand-badge">PRO</span>
+        </div>
+
+        <!-- Central Search Bar -->
+        <div class="header-search-bar">
+          <svg class="search-icon-left" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="top-search-input" class="header-search-input" placeholder="Search songs, artists, albums, or lyrics (Press '/' to focus)..." aria-label="Search">
+        </div>
+
+        <!-- Header Quick Action Controls -->
+        <div class="header-actions">
+          <div id="header-ambient-pill-wrap" class="ambient-header-pill-wrapper"></div>
+          <button class="theme-toggle-header-btn" id="header-theme-toggle-btn" type="button" title="Switch to Light Mode" aria-label="Toggle Dark and Light Theme">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </button>
+          <button class="btn-primary" id="header-install-btn" style="display:none;padding:5px 12px;font-size:0.78rem;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Install</span>
+          </button>
+          <button class="icon-btn" id="btn-shortcuts-help" style="display:none;" title="Keyboard Shortcuts (?)" aria-label="Keyboard Shortcuts">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+              <line x1="6" y1="8" x2="6.01" y2="8"></line>
+              <line x1="10" y1="8" x2="10.01" y2="8"></line>
+              <line x1="14" y1="8" x2="14.01" y2="8"></line>
+              <line x1="18" y1="8" x2="18.01" y2="8"></line>
+              <line x1="8" y1="16" x2="16" y2="16"></line>
+            </svg>
+          </button>
+          <button class="btn-primary" id="pwa-install-btn" style="display:none;padding:6px 14px;font-size:0.8rem;">
+            Install App
+          </button>
+        </div>
+      </header>
+
+      <!-- Offline Status Alert Banner -->
+      <div id="offline-banner" style="display:none;align-items:center;justify-content:center;gap:8px;background:rgba(239,68,68,0.92);backdrop-filter:blur(8px);color:#ffffff;font-size:0.8rem;font-weight:600;padding:6px 16px;z-index:9999;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path><path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+        <span>Offline Mode Active — Cached tracks and local device music are available. YouTube search requires internet.</span>
+      </div>
+
+      <!-- Main Shell Body (Sidebar + Content Viewport + Right Panel) -->
+      <main class="app-main-body">
+        <!-- Navigation Sidebar -->
+        <aside class="app-sidebar" id="app-sidebar">
+          <div class="nav-group">
+            <div class="nav-group-title">Discover</div>
+            <div class="nav-links">
+              <a href="#/" class="nav-link active">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <span>Home</span>
+              </a>
+              <a href="#/search" class="nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <span>Search</span>
+              </a>
+              <a href="#/genres" class="nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <span>Genres & Moods</span>
+              </a>
+              <a href="#/radio" class="nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"></circle><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"></path></svg>
+                <span>Live Radio</span>
+              </a>
+              <a href="#/podcasts" class="nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                <span>Podcasts</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="nav-group">
+            <div class="nav-group-title">My Collection</div>
+            <div class="nav-links">
+              <a href="#/local" class="nav-link" id="nav-local-music">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                <span>Local Music</span>
+                <span class="badge-pill" style="font-size:0.65rem;margin-left:auto;padding:1px 6px;">OFFLINE</span>
+              </a>
+              <a href="#/songs" class="nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                <span>All Songs</span>
+              </a>
+              <a href="#/albums" class="nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+                <span>Albums</span>
+              </a>
+              <a href="#/artists" class="nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <span>Artists</span>
+              </a>
+              <a href="#/playlists" class="nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                <span>Playlists</span>
+              </a>
+              <a href="#/favorites" class="nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                <span>Loved Songs</span>
+              </a>
+              <a href="#/recent" class="nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <span>Recently Played</span>
+              </a>
+              <a href="#/most-played" class="nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                <span>Most Played</span>
+              </a>
+              <a href="#/downloads" class="nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Offline Downloads</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="nav-group">
+            <div class="nav-group-title">Audio Studio</div>
+            <div class="nav-links">
+              <a href="#/equalizer" class="nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                <span>Hardware EQ</span>
+              </a>
+              <a href="#/visualizer" class="nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                <span>Visualizer (60 FPS)</span>
+              </a>
+              <a href="#/lyrics" class="nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                <span>Synced Lyrics</span>
+              </a>
+              <a href="#/statistics" class="nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"></path><path d="M12 20V4"></path><path d="M6 20v-6"></path></svg>
+                <span>Listening Analytics</span>
+              </a>
+              <a href="#/settings" class="nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <span>Settings & Audit</span>
+              </a>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Dynamic Main Content Viewport -->
+        <section class="app-content-viewport" id="content-viewport" role="region" aria-label="Content Area">
+          <!-- Rendered views will mount here -->
+        </section>
+
+        <!-- Collapsible Right Panel -->
+        <aside class="app-right-panel" id="right-panel">
+          <div class="right-panel-header">
+            <div class="right-panel-tabs">
+              <button class="panel-tab-btn active" data-tab="queue">Queue</button>
+              <button class="panel-tab-btn" data-tab="lyrics">Lyrics</button>
+              <button class="panel-tab-btn" data-tab="info">Info</button>
+            </div>
+          </div>
+          <div id="right-panel-content" style="flex:1;overflow-y:auto;">
+            <!-- Rendered by UI manager -->
+          </div>
+        </aside>
+      </main>
+
+      <!-- Persistent High-Fidelity Bottom Player Bar (Reference Aesthetic) -->
+      <footer class="app-player-bar" id="app-player-bar">
+        <!-- Ambient wave graphic overlay inside mini player -->
+        <div class="mini-player-wave-mesh" aria-hidden="true">
+          <svg class="mini-player-wave-svg" viewBox="0 0 600 120" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M 0,60 C 150,20 280,100 420,45 C 500,10 560,70 600,50" fill="none" stroke="rgba(0, 245, 160, 0.22)" stroke-width="2"></path>
+            <path d="M 0,75 C 180,95 320,30 460,80 C 530,105 570,40 600,65" fill="none" stroke="rgba(0, 217, 245, 0.18)" stroke-width="1.4"></path>
+          </svg>
+        </div>
+
+        <!-- Upper Row: Track Info + Controls -->
+        <div class="player-upper-row" id="player-upper-row">
+          <!-- Left: Track Artwork & Info -->
+          <div class="player-left" id="player-left-box">
+            <div class="player-thumb-wrapper" id="player-thumb-box" title="Click to expand fullscreen player">
+              <img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201%201%22%2F%3E" alt="Album Artwork" id="player-thumb" class="player-thumb-img" referrerpolicy="no-referrer" onerror="if(typeof window.__musiqImgFallback==='function')window.__musiqImgFallback(this);">
+              <div class="player-thumb-eq-overlay" id="player-thumb-eq-overlay" title="Active playback">
+                <div class="spotify-eq-bars mini" id="player-thumb-eq-bars">
+                  <span class="spotify-eq-bar bar-1"></span>
+                  <span class="spotify-eq-bar bar-2"></span>
+                  <span class="spotify-eq-bar bar-3"></span>
+                  <span class="spotify-eq-bar bar-4"></span>
+                </div>
+              </div>
+            </div>
+            <div class="player-meta" id="player-meta-box">
+              <div class="player-title" id="player-title">Song Title</div>
+              <div class="player-artist" id="player-artist">Artist Name</div>
+              <div class="player-meta-subline">
+                <div class="player-badges" id="player-badges"></div>
+                <button class="spotify-active-pill" id="player-bar-spotify-eq" title="Toggle Play / Pause" aria-label="Toggle Playback Status">
+                  <span class="spotify-eq-text" id="player-bar-eq-text">PLAYING</span>
+                </button>
+              </div>
+            </div>
+            <button class="icon-btn hide-on-mobile" id="player-fav-btn" title="Add to Favorites" aria-label="Favorite">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            </button>
+          </div>
+
+          <!-- Center: Playback Controls & Interactive Seek Slider (Desktop) -->
+          <div class="player-center">
+            <div class="player-controls-row">
+              <button class="control-btn" id="player-shuffle-btn" title="Toggle Shuffle (S)" aria-label="Shuffle">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+              </button>
+              <button class="control-btn" id="player-prev-btn" title="Previous Track (Shift+←)" aria-label="Previous Track">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+              </button>
+              <div class="mini-play-ring-outer" id="mini-play-ring-outer">
+                <button class="play-pause-btn" id="player-play-btn" title="Play / Pause (Space)" aria-label="Play / Pause">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                </button>
+              </div>
+              <button class="control-btn" id="player-next-btn" title="Next Track (Shift+→)" aria-label="Next Track">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+              </button>
+              <button class="control-btn" id="player-repeat-btn" title="Toggle Repeat (R)" aria-label="Repeat">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+              </button>
+            </div>
+
+            <div class="player-progress-row">
+              <span class="time-label" id="time-current">0:00</span>
+              <div class="custom-slider" id="seek-slider" role="slider" aria-label="Audio Seek Progress">
+                <div class="slider-track">
+                  <div class="slider-buffer" id="seek-buffer" style="width: 100%;"></div>
+                  <div class="slider-fill" id="seek-fill" style="width: 0%;"></div>
+                  <div class="slider-thumb" id="seek-thumb" style="left: 0%;"></div>
+                </div>
+              </div>
+              <span class="time-label" id="time-duration">0:00</span>
+            </div>
+          </div>
+
+          <!-- Right: Mobile Quick Controls + Desktop Extras & Volume -->
+          <div class="player-right">
+            <!-- Mobile Quick Controls Group (Exact match to reference image) -->
+            <div class="mobile-player-controls-group" id="mobile-player-controls-group">
+              <button class="icon-btn mobile-player-btn" id="mobile-prev-btn" title="Previous Track (Shift+←)" aria-label="Previous Track">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></line></svg>
+              </button>
+              <div class="mobile-play-ring-outer" id="mobile-play-ring-outer">
+                <button class="icon-btn mobile-player-btn mobile-play-core" id="mobile-play-btn" title="Play / Pause" aria-label="Play / Pause">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                </button>
+              </div>
+              <button class="icon-btn mobile-player-btn" id="mobile-next-btn" title="Next Track" aria-label="Next Track">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></line></svg>
+              </button>
+              <button class="icon-btn mobile-player-btn" id="mobile-video-btn" title="Watch Music Video" aria-label="Watch Video" style="display:none;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              </button>
+              <button class="icon-btn mobile-player-btn mobile-fav-btn" id="mobile-fav-btn" title="Add to Favorites" aria-label="Favorite">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              </button>
+              <button class="icon-btn mobile-player-btn mobile-menu-btn" id="mobile-menu-btn" title="Track Options" aria-label="More Options">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="12" cy="19" r="2"></circle></svg>
+              </button>
+            </div>
+
+            <!-- Desktop Buttons -->
+            <button class="icon-btn hide-on-mobile spotify-video-btn" id="player-video-btn" title="Switch to Video (YouTube Music Video)" aria-label="Switch to Video" style="display:none;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
+            </button>
+            <button class="icon-btn hide-on-mobile" id="player-lyrics-btn" title="Synced Lyrics (L)" aria-label="Lyrics">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+            </button>
+            <button class="icon-btn hide-on-mobile" id="player-vis-btn" title="Visualizer (V)" aria-label="Visualizer">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            </button>
+            <button class="icon-btn hide-on-mobile" id="player-eq-btn" title="Hardware Equalizer (E)" aria-label="Equalizer">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line></svg>
+            </button>
+            <button class="icon-btn hide-on-mobile" id="player-quality-btn" title="Audio Quality Settings" aria-label="Audio Quality">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+            </button>
+            <button class="icon-btn hide-on-mobile" id="player-timer-btn" title="Sleep Timer" aria-label="Sleep Timer">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+            </button>
+            <button class="icon-btn hide-on-mobile" id="player-queue-btn" title="Playback Queue" aria-label="Queue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            </button>
+
+            <!-- Volume Bar -->
+            <div class="volume-group hide-on-mobile">
+              <button class="icon-btn" id="player-vol-btn" title="Mute / Unmute (M)" aria-label="Volume">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+              </button>
+              <div class="custom-slider" id="volume-slider" style="height: 14px;" role="slider" aria-label="Volume Slider">
+                <div class="slider-track" style="height: 3px;">
+                  <div class="slider-fill" id="volume-fill" style="width: 80%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <button class="icon-btn hide-on-mobile" id="player-expand-btn" title="Fullscreen Player (F)" aria-label="Fullscreen">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile Bottom Seeker & Time Display (Exact match to reference image) -->
+        <div class="mobile-player-seeker-block" id="mobile-player-seeker-block">
+          <div class="custom-slider mobile-seek-slider" id="mobile-seek-slider" role="slider" aria-label="Audio Seek Progress">
+            <div class="slider-track">
+              <div class="slider-fill mobile-seek-fill" id="mobile-seek-fill" style="width: 0%;"></div>
+              <div class="slider-thumb mobile-seek-thumb" id="mobile-seek-thumb" style="left: 0%;"></div>
+            </div>
+          </div>
+          <div class="mobile-time-row">
+            <span class="time-label mobile-time-label" id="mobile-time-current">0:00</span>
+            <span class="time-label mobile-time-label" id="mobile-time-duration">0:00</span>
+          </div>
+        </div>
+      </footer>
+
+      <!-- Mobile Bottom Navigation Bar (Shown only on small screens) -->
+      <nav class="mobile-nav-bar" aria-label="Mobile Navigation">
+        <a href="#/" class="mobile-nav-item active">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+          <span>Home</span>
+        </a>
+        <a href="#/search" class="mobile-nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span>Search</span>
+        </a>
+        <a href="#/songs" class="mobile-nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+          <span>Library</span>
+        </a>
+        <a href="#/local" class="mobile-nav-item" id="mobile-nav-local">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+          <span>Local</span>
+        </a>
+        <a href="#/radio" class="mobile-nav-item">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="m17 2-5 5"></path><circle cx="8" cy="14" r="2"></circle><line x1="14" y1="12" x2="18" y2="12"></line><line x1="14" y1="16" x2="18" y2="16"></line></svg>
+          <span>Radio</span>
+        </a>
+        <a href="#/settings" class="mobile-nav-item">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span>Settings</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Fullscreen Player Modal (Apple Music / Spotify Style) -->
+    <div class="fullscreen-player-modal" id="fullscreen-player-modal">
+      <div class="fs-backdrop-blur" id="fs-backdrop-blur">
+        <div class="apple-aurora-mesh" id="apple-aurora-mesh">
+          <div class="apple-mesh-orb orb-1"></div>
+          <div class="apple-mesh-orb orb-2"></div>
+          <div class="apple-mesh-orb orb-3"></div>
+          <div class="apple-mesh-orb orb-4"></div>
+        </div>
+      </div>
+
+      <!-- Top Header Bar with Segmented Switcher -->
+      <div class="fs-top-bar">
+        <button class="icon-btn fs-icon-btn" id="fs-close-btn" title="Collapse Player" aria-label="Collapse Player">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+
+        <div class="fs-segmented-switcher" id="fs-segmented-switcher">
+          <button class="fs-switch-btn active" id="fs-switch-player" data-view="player">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8" fill="currentColor"></polygon></svg>
+            <span>Audio</span>
+          </button>
+          <button class="fs-switch-btn" id="fs-switch-video" data-view="video" style="display:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+            <span>Video</span>
+          </button>
+          <button class="fs-switch-btn" id="fs-switch-lyrics" data-view="lyrics">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <span>Lyrics</span>
+          </button>
+        </div>
+
+        <button class="icon-btn fs-icon-btn" id="fs-fav-btn" title="Favorite Track" aria-label="Favorite">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        </button>
+      </div>
+
+      <!-- Main Body Container -->
+      <div class="fs-main-body view-player" id="fs-main-body">
+        <!-- Panel 1: Dedicated Player View -->
+        <div class="fs-panel fs-player-panel" id="fs-player-panel">
+          <!-- Visualizer & Artwork Stage (Sound wave wings + glowing circular aura) -->
+          <div class="fs-visualizer-stage" id="fs-visualizer-stage">
+            <!-- Glowing Orbit Aura Ring -->
+            <div class="fs-aura-ring" id="fs-aura-ring"></div>
+
+            <!-- Left Sound Wave Wing (14 vertical audio bars) -->
+            <div class="fs-wave-wing fs-wave-left" id="fs-wave-left" aria-hidden="true">
+              <span class="fs-wave-bar" style="--bar-i: 0; --bar-h: 38px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 1; --bar-h: 52px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 2; --bar-h: 70px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 3; --bar-h: 92px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 4; --bar-h: 86px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 5; --bar-h: 76px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 6; --bar-h: 88px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 7; --bar-h: 74px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 8; --bar-h: 60px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 9; --bar-h: 46px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 10; --bar-h: 34px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 11; --bar-h: 24px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 12; --bar-h: 17px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 13; --bar-h: 11px;"></span>
+            </div>
+
+            <!-- Center Artwork Card with Spotify video switch badge & menu button -->
+            <div class="fs-artwork-card" id="fs-artwork-card" title="Tap to view lyrics">
+              <img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201%201%22%2F%3E" alt="Album Artwork" id="fs-artwork-img" class="fs-artwork-img" referrerpolicy="no-referrer" onerror="if(typeof window.__musiqImgFallback==='function')window.__musiqImgFallback(this);">
+              <button class="fs-art-switch-video-btn" id="fs-art-switch-video-btn" title="Watch Music Video" aria-label="Watch Music Video" style="display:none;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                <span>Switch to Video</span>
+              </button>
+              <button class="fs-art-menu-btn" id="fs-art-menu-btn" title="Track options" aria-label="Track options">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="2.2"></circle><circle cx="5" cy="12" r="2.2"></circle><circle cx="19" cy="12" r="2.2"></circle></svg>
+              </button>
+            </div>
+
+            <!-- Dedicated Real-Time Audio Visualizer Panel (toggled via bottom Visualizer button) -->
+            <div class="fs-live-visualizer-panel" id="fs-live-visualizer-panel" aria-hidden="true">
+              <div class="fs-live-vis-header">
+                <div class="fs-live-vis-badge">
+                  <span class="fs-live-vis-dot"></span>
+                  <span class="fs-live-vis-tag">LIVE SPECTRUM</span>
+                  <span class="fs-live-vis-subtag" id="fs-live-vis-subtag">MULTI-COLOR • 48kHz</span>
+                </div>
+                <button type="button" class="fs-live-vis-close-btn" id="fs-live-vis-close-btn" title="Return to Album Artwork" aria-label="Return to Album Artwork">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+              </div>
+              <div class="fs-live-vis-canvas-wrap">
+                <canvas class="fs-live-vis-canvas" id="fs-live-vis-canvas"></canvas>
+              </div>
+              <div class="fs-live-vis-footer">
+                <div class="fs-live-vis-modes" id="fs-live-vis-modes">
+                  <button type="button" class="fs-vis-mode-pill active" data-vis-mode="bars" title="Studio Multi-Color Equalizer Bars">Bars</button>
+                  <button type="button" class="fs-vis-mode-pill" data-vis-mode="wave" title="Neon Oscilloscope Waveform">Wave</button>
+                  <button type="button" class="fs-vis-mode-pill" data-vis-mode="spectrum" title="Aurora Frequency Spectrum">Aurora</button>
+                </div>
+                <div class="fs-live-vis-themes" id="fs-live-vis-themes">
+                  <button type="button" class="fs-vis-theme-dot active" data-vis-theme="prism" title="Prism Rainbow Spectrum" style="background: linear-gradient(135deg, #06b6d4, #22c55e, #f59e0b, #ec4899);"></button>
+                  <button type="button" class="fs-vis-theme-dot" data-vis-theme="cyber" title="Cyber Cyan & Violet" style="background: linear-gradient(135deg, #06b6d4, #3b82f6, #a855f7);"></button>
+                  <button type="button" class="fs-vis-theme-dot" data-vis-theme="sunset" title="Sunset Gold & Coral" style="background: linear-gradient(135deg, #f59e0b, #f97316, #ec4899);"></button>
+                  <button type="button" class="fs-vis-theme-dot" data-vis-theme="emerald" title="Emerald Luxe" style="background: linear-gradient(135deg, #059669, #10b981, #6ee7b7);"></button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Sound Wave Wing (14 vertical audio bars - symmetrical from artwork outward) -->
+            <div class="fs-wave-wing fs-wave-right" id="fs-wave-right" aria-hidden="true">
+              <span class="fs-wave-bar" style="--bar-i: 0; --bar-h: 38px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 1; --bar-h: 52px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 2; --bar-h: 70px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 3; --bar-h: 92px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 4; --bar-h: 86px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 5; --bar-h: 76px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 6; --bar-h: 88px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 7; --bar-h: 74px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 8; --bar-h: 60px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 9; --bar-h: 46px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 10; --bar-h: 34px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 11; --bar-h: 24px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 12; --bar-h: 17px;"></span>
+              <span class="fs-wave-bar" style="--bar-i: 13; --bar-h: 11px;"></span>
+            </div>
+          </div>
+
+          <!-- Metadata Section -->
+          <div class="fs-meta-section">
+            <div class="fs-now-playing-pill" id="fs-spotify-eq-badge">
+              <span class="fs-pill-status" id="fs-player-eq-status">NOW PLAYING</span>
+              <span class="fs-pill-divider"></span>
+              <span class="fs-pill-format" id="fs-player-eq-format">1411 kbps • FLAC</span>
+            </div>
+            <h2 id="fs-title" class="fs-track-title">Title</h2>
+            <p id="fs-artist" class="fs-track-artist">Artist</p>
+          </div>
+
+          <!-- High-Precision Scrubber Slider -->
+          <div class="fs-scrubber-box">
+            <div class="custom-slider fs-seek-slider" id="fs-seek-slider" role="slider" aria-label="Track Position">
+              <div class="slider-track fs-seek-track">
+                <div class="slider-fill fs-seek-fill" id="fs-seek-fill" style="width: 0%;"></div>
+                <div class="slider-thumb fs-seek-thumb" id="fs-seek-thumb" style="left: 0%;"></div>
+              </div>
+            </div>
+            <div class="fs-time-row">
+              <span id="fs-time-current">0:00</span>
+              <span id="fs-time-duration">0:00</span>
+            </div>
+          </div>
+
+          <!-- Refined Playback Controls Row with Glowing Ring Play Button -->
+          <div class="fs-controls-row">
+            <button class="control-btn fs-btn-subtle" id="fs-shuffle-btn" title="Shuffle" aria-label="Shuffle">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+            </button>
+            <button class="control-btn fs-btn-main fs-circle-control" id="fs-prev-btn" title="Previous Track" aria-label="Previous">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="3" stroke-linecap="round"></line></svg>
+            </button>
+            <div class="fs-play-ring-outer" id="fs-play-ring-outer">
+              <button class="play-pause-btn fs-play-btn" id="fs-play-btn" title="Play / Pause" aria-label="Play / Pause">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+              </button>
+            </div>
+            <button class="control-btn fs-btn-main fs-circle-control" id="fs-next-btn" title="Next Track" aria-label="Next">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="3" stroke-linecap="round"></line></svg>
+            </button>
+            <button class="control-btn fs-btn-subtle" id="fs-repeat-btn" title="Repeat" aria-label="Repeat">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+              <span class="fs-repeat-dot" id="fs-repeat-dot"></span>
+            </button>
+          </div>
+
+          <!-- Bottom Quick Actions: Visualizer and Equalizer Pills -->
+          <div class="fs-quick-tools">
+            <button class="fs-tool-pill" id="fs-visualizer-btn" title="Toggle Real-Time Audio Visualizer">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10v4"></path><path d="M6 6v12"></path><path d="M10 3v18"></path><path d="M14 7v10"></path><path d="M18 5v14"></path><path d="M22 10v4"></path></svg>
+              <span>Visualizer</span>
+            </button>
+            <button class="fs-tool-pill" id="fs-eq-btn" title="Audio Equalizer">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+              <span>Equalizer</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Panel 2: Dedicated Immersive Lyrics View -->
+        <div class="fs-panel fs-lyrics-panel" id="fs-lyrics-panel">
+          <div class="fs-lyrics-top-header">
+            <div class="fs-lyrics-track-summary">
+              <span id="fs-lyrics-song-title" class="fs-lyrics-song-title">Title</span>
+              <span class="fs-lyrics-bullet">•</span>
+              <span id="fs-lyrics-song-artist" class="fs-lyrics-song-artist">Artist</span>
+            </div>
+            <button class="fs-tool-chip fs-back-chip" id="fs-back-to-art-btn" title="Return to Player">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+              <span>Artwork</span>
+            </button>
+          </div>
+
+          <!-- Synchronized Lyrics Scroll View -->
+          <div class="fs-lyrics-viewport" id="fs-lyrics-viewport">
+            <div id="fs-lyrics-display"></div>
+          </div>
+
+          <!-- Bottom Mini Controller in Lyrics View -->
+          <div class="fs-lyrics-mini-bar">
+            <div class="fs-lyrics-seek-line">
+              <div class="fs-lyrics-seek-fill" id="fs-lyrics-progress-fill" style="width: 0%;"></div>
+            </div>
+            <div class="fs-lyrics-bar-row">
+              <div class="fs-lyrics-bar-meta">
+                <span id="fs-lyrics-bar-title" class="fs-lyrics-bar-title">Title</span>
+              </div>
+              <div class="fs-lyrics-bar-btns">
+                <button class="control-btn fs-mini-btn" id="fs-lyrics-prev-btn" aria-label="Previous">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+                </button>
+                <button class="play-pause-btn fs-mini-play" id="fs-lyrics-play-btn" aria-label="Play / Pause">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                </button>
+                <button class="control-btn fs-mini-btn" id="fs-lyrics-next-btn" aria-label="Next">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel 3: Spotify-Style Dedicated Video View -->
+        <div class="fs-panel fs-video-panel" id="fs-video-panel">
+          <div class="fs-video-top-header">
+            <div class="fs-video-track-summary">
+              <span class="fs-video-live-badge">MUSIC VIDEO</span>
+              <span id="fs-video-song-title" class="fs-video-song-title">Title</span>
+              <span class="fs-video-bullet">•</span>
+              <span id="fs-video-song-artist" class="fs-video-song-artist">Artist</span>
+            </div>
+            <div class="fs-video-actions">
+              <button class="fs-tool-chip fs-switch-audio-chip" id="fs-video-switch-audio-btn" title="Switch to Audio Only">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8" fill="currentColor"></polygon></svg>
+                <span>Audio</span>
+              </button>
+              <button class="fs-tool-chip fs-maximize-chip" id="fs-video-maximize-btn" title="Maximize Video">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Video Canvas Stage Placeholder / Mount Anchor -->
+          <div class="fs-video-stage" id="fs-video-stage">
+            <div class="fs-video-aura-glow"></div>
+            <!-- Dynamic Video Status Overlay -->
+            <div class="fs-video-status-overlay" id="fs-video-status-overlay" style="display:none;">
+              <div class="spinner-ring"></div>
+              <span id="fs-video-status-text">Loading Official Music Video...</span>
+            </div>
+          </div>
+
+          <!-- Bottom Mini Bar for Video View -->
+          <div class="fs-video-controls-bar">
+            <!-- Scrubber line -->
+            <div class="fs-video-seek-box">
+              <div class="fs-video-seek-line" id="fs-video-seek-line">
+                <div class="fs-video-seek-fill" id="fs-video-seek-fill" style="width: 0%;"></div>
+              </div>
+              <div class="fs-video-time-row">
+                <span id="fs-video-time-current">0:00</span>
+                <span id="fs-video-time-duration">0:00</span>
+              </div>
+            </div>
+            <div class="fs-video-btns-row">
+              <button class="control-btn fs-mini-btn" id="fs-video-prev-btn" title="Previous Track" aria-label="Previous">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+              </button>
+              <button class="play-pause-btn fs-mini-play" id="fs-video-play-btn" title="Play / Pause" aria-label="Play / Pause">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              </button>
+              <button class="control-btn fs-mini-btn" id="fs-video-next-btn" title="Next Track" aria-label="Next">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+    <!-- Dynamic Modal Overlay System -->
+    <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true">
+      <div id="modal-container"></div>
+    </div>
+
+    <!-- YouTube Floating Video Player Card & Audio Anchor -->
+    <div id="youtube-player-host" class="youtube-player-card is-hidden">
+      <div class="yt-card-header">
+        <div class="yt-card-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="color:#ff0000;margin-right:6px;flex-shrink:0;"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          <span id="yt-card-title-text">YouTube Video</span>
+        </div>
+        <div class="yt-card-actions">
+          <button id="yt-expand-fullscreen-btn" class="yt-action-btn" title="Open Fullscreen Video" aria-label="Open Fullscreen Video">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+          </button>
+          <button id="yt-pip-toggle-btn" class="yt-action-btn" title="Toggle Size" aria-label="Toggle Size">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+          </button>
+          <button id="yt-minimize-btn" class="yt-action-btn" title="Audio Only Mode" aria-label="Audio Only Mode">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
+          </button>
+        </div>
+      </div>
+      <div id="youtube-player-container" class="yt-iframe-box">
+        <div id="youtube-player-mount"></div>
+      </div>
+      <div id="yt-click-to-play-prompt" class="yt-prompt-overlay" style="display:none;">
+        <button id="yt-click-to-play-btn" class="btn-primary" style="padding:8px 16px;font-size:0.85rem;border-radius:20px;cursor:pointer;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right:6px;vertical-align:-2px;"><path d="M8 5v14l11-7z"/></svg> Tap to Play Video
+        </button>
+      </div>
+    </div>
+
+    <!-- Persistent Hidden Inputs for Auto-Loading Device Audio from any folder -->
+    <input
+      type="file"
+      id="global-device-audio-input"
+      multiple
+      accept="audio/*,.mp3,.m4a,.flac,.wav,.aac,.ogg,.opus,.weba,.webm,.wma,.alac,.mp4,audio/mpeg,audio/mp4,audio/flac,audio/x-m4a,audio/aac,audio/ogg,audio/x-wav"
+      style="display:none;"
+    />
+    <input
+      type="file"
+      id="global-device-folder-input"
+      webkitdirectory
+      directory
+      multiple
+      style="display:none;"
+    />
+
+    <!-- Hidden audio mounting element for React bridge -->
+    <div id="root" style="display:none;"></div>
+
+    <!-- App Bootstrap Script -->
+    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="/js/app.js"></script>
+  </body>
+</html>

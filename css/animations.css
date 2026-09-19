@@ -1,0 +1,486 @@
+/* Animations and Transitions */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin-vinyl {
+  animation: spinSlow 20s linear infinite;
+}
+
+.spin-vinyl.paused {
+  animation-play-state: paused;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px var(--color-accent-glow);
+  }
+  50% {
+    box-shadow: 0 0 35px var(--color-accent-glow);
+  }
+}
+
+.pulse-glow {
+  animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+/* Skeleton Loading Card Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-box {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* Ripple interaction */
+.ripple-fx {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-fx::after {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transform: scale(10, 10);
+  opacity: 0;
+  transition: transform .4s, opacity .8s;
+}
+
+.ripple-fx:active::after {
+  transform: scale(0, 0);
+  opacity: 0.2;
+  transition: 0s;
+}
+
+/* ==========================================================================
+   Spotify Active Bar Equalizer Animation with Dynamic CSS Transitions
+   ========================================================================== */
+
+.spotify-eq-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2.5px;
+  height: 15px;
+  width: 17px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.spotify-eq-bars.mini {
+  height: 12px;
+  width: 14px;
+  gap: 2px;
+}
+
+.spotify-eq-bars.large {
+  height: 22px;
+  width: 26px;
+  gap: 3.5px;
+}
+
+.spotify-eq-bar {
+  display: block;
+  flex: 1;
+  width: 2.5px;
+  height: 100%;
+  background: #1db954;
+  border-radius: 2px;
+  transform-origin: bottom;
+  transform: scaleY(0.2);
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.25s ease, opacity 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 0 6px rgba(29, 185, 84, 0.3);
+}
+
+.spotify-eq-bars.mini .spotify-eq-bar {
+  width: 2px;
+  border-radius: 1px;
+}
+
+.spotify-eq-bars.large .spotify-eq-bar {
+  width: 4px;
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(29, 185, 84, 0.45);
+}
+
+/* Smooth CSS transition for audio-reactive real-time frame scaling */
+.spotify-eq-bars.audio-reactive .spotify-eq-bar {
+  animation: none !important;
+  transition: transform 0.09s ease-out, box-shadow 0.15s ease;
+}
+
+/* Active playback keyframe oscillations with staggered rhythms */
+.spotify-eq-bars.is-playing:not(.audio-reactive) .bar-1,
+.is-playing .spotify-eq-bars:not(.audio-reactive):not(.is-paused) .bar-1 {
+  animation: spotifyBounce1 0.85s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+}
+
+.spotify-eq-bars.is-playing:not(.audio-reactive) .bar-2,
+.is-playing .spotify-eq-bars:not(.audio-reactive):not(.is-paused) .bar-2 {
+  animation: spotifyBounce2 0.68s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate 0.15s;
+}
+
+.spotify-eq-bars.is-playing:not(.audio-reactive) .bar-3,
+.is-playing .spotify-eq-bars:not(.audio-reactive):not(.is-paused) .bar-3 {
+  animation: spotifyBounce3 1.05s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate 0.05s;
+}
+
+.spotify-eq-bars.is-playing:not(.audio-reactive) .bar-4,
+.is-playing .spotify-eq-bars:not(.audio-reactive):not(.is-paused) .bar-4 {
+  animation: spotifyBounce4 0.82s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate 0.22s;
+}
+
+/* Paused State: Smooth CSS transition gracefully collapses bars into low resting state */
+.spotify-eq-bars.is-paused .spotify-eq-bar,
+.spotify-eq-bars:not(.is-playing) .spotify-eq-bar,
+.is-paused .spotify-eq-bars .spotify-eq-bar {
+  animation: none !important;
+  transform: scaleY(0.2) !important;
+  opacity: 0.55;
+  background: var(--color-text-muted);
+  box-shadow: none;
+}
+
+@keyframes spotifyBounce1 {
+  0% { transform: scaleY(0.2); }
+  25% { transform: scaleY(0.88); }
+  50% { transform: scaleY(0.35); }
+  75% { transform: scaleY(0.95); }
+  100% { transform: scaleY(0.5); }
+}
+
+@keyframes spotifyBounce2 {
+  0% { transform: scaleY(0.3); }
+  30% { transform: scaleY(1); }
+  60% { transform: scaleY(0.4); }
+  85% { transform: scaleY(0.82); }
+  100% { transform: scaleY(0.25); }
+}
+
+@keyframes spotifyBounce3 {
+  0% { transform: scaleY(0.18); }
+  20% { transform: scaleY(0.65); }
+  50% { transform: scaleY(1); }
+  75% { transform: scaleY(0.45); }
+  100% { transform: scaleY(0.72); }
+}
+
+@keyframes spotifyBounce4 {
+  0% { transform: scaleY(0.35); }
+  35% { transform: scaleY(0.92); }
+  65% { transform: scaleY(0.28); }
+  85% { transform: scaleY(1); }
+  100% { transform: scaleY(0.4); }
+}
+
+/* Spotify Active Progress Bar Dynamic Styling with CSS Transitions */
+.slider-fill.spotify-active-bar,
+.is-playing .slider-fill,
+.is-playing .fs-seek-fill {
+  background: linear-gradient(90deg, var(--color-accent) 0%, #1db954 100%) !important;
+  box-shadow: 0 0 10px rgba(29, 185, 84, 0.45);
+  transition: width 0.1s linear, background-color 0.28s ease, box-shadow 0.28s ease;
+}
+
+.is-playing .slider-thumb,
+.is-playing .fs-seek-thumb {
+  background: #ffffff !important;
+  border: 2px solid #1db954 !important;
+  box-shadow: 0 0 12px rgba(29, 185, 84, 0.8) !important;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease;
+}
+
+.is-playing .custom-slider:hover .slider-thumb {
+  transform: translate(-50%, -50%) scale(1.25) !important;
+}
+
+/* ==========================================================================
+   Apple Music Living Aurora Mesh Backdrop Animations
+   ========================================================================== */
+
+.apple-aurora-mesh {
+  position: absolute;
+  inset: -25%;
+  width: 150%;
+  height: 150%;
+  pointer-events: none;
+  overflow: hidden;
+  filter: blur(55px);
+  mix-blend-mode: screen;
+  opacity: 0.85;
+  will-change: transform;
+}
+
+.is-paused .apple-aurora-mesh {
+  opacity: 0.55;
+  transition: opacity 1.2s ease;
+}
+
+.apple-mesh-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(45px);
+  opacity: 0.72;
+  will-change: transform, opacity;
+}
+
+.apple-mesh-orb.orb-1 {
+  width: 480px;
+  height: 480px;
+  top: 12%;
+  left: 10%;
+  background: radial-gradient(circle, var(--color-accent, #ff2d55) 0%, rgba(255, 45, 85, 0.05) 65%, transparent 100%);
+  animation: appleMeshOrbit1 20s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+}
+
+.apple-mesh-orb.orb-2 {
+  width: 520px;
+  height: 520px;
+  top: 42%;
+  right: 12%;
+  background: radial-gradient(circle, #7928ca 0%, rgba(121, 40, 202, 0.05) 65%, transparent 100%);
+  animation: appleMeshOrbit2 25s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+}
+
+.apple-mesh-orb.orb-3 {
+  width: 440px;
+  height: 440px;
+  bottom: 12%;
+  left: 22%;
+  background: radial-gradient(circle, #0070f3 0%, rgba(0, 112, 243, 0.05) 65%, transparent 100%);
+  animation: appleMeshOrbit3 22s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+}
+
+.apple-mesh-orb.orb-4 {
+  width: 390px;
+  height: 390px;
+  top: 30%;
+  left: 45%;
+  background: radial-gradient(circle, #ff0080 0%, rgba(255, 0, 128, 0.05) 65%, transparent 100%);
+  animation: appleMeshOrbit4 28s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+}
+
+.is-paused .apple-mesh-orb {
+  animation-play-state: paused !important;
+}
+
+@keyframes appleMeshOrbit1 {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50% { transform: translate(130px, 80px) scale(1.22) rotate(80deg); }
+  100% { transform: translate(-80px, 150px) scale(0.92) rotate(160deg); }
+}
+
+@keyframes appleMeshOrbit2 {
+  0% { transform: translate(0, 0) scale(1.1) rotate(0deg); }
+  50% { transform: translate(-150px, -90px) scale(0.95) rotate(-90deg); }
+  100% { transform: translate(65px, -160px) scale(1.26) rotate(-190deg); }
+}
+
+@keyframes appleMeshOrbit3 {
+  0% { transform: translate(0, 0) scale(0.95); }
+  50% { transform: translate(95px, -110px) scale(1.2); }
+  100% { transform: translate(-110px, 65px) scale(1.04); }
+}
+
+@keyframes appleMeshOrbit4 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-85px, 120px) scale(1.16); }
+  100% { transform: translate(100px, -75px) scale(0.88); }
+}
+
+/* ==========================================================================
+   Apple Music Artwork Physical Elevation & Breathing
+   ========================================================================== */
+
+@keyframes appleArtworkBreathe {
+  0%, 100% {
+    transform: scale(1.04) translateY(-3px);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 45px rgba(255, 45, 85, 0.3);
+  }
+  50% {
+    transform: scale(1.07) translateY(-6px);
+    box-shadow: 0 32px 75px rgba(0, 0, 0, 0.72), 0 0 65px rgba(255, 45, 85, 0.45);
+  }
+}
+
+@keyframes appleArtworkPop {
+  0% {
+    transform: scale(0.9) translateY(0);
+    opacity: 0.6;
+    filter: blur(6px);
+  }
+  60% {
+    transform: scale(1.08) translateY(-4px);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  100% {
+    transform: scale(1.04) translateY(-3px);
+    opacity: 1;
+    filter: blur(0px);
+  }
+}
+
+/* ==========================================================================
+   Apple Music Spring Controls & Elastic Morphing
+   ========================================================================== */
+
+.apple-icon-pop {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  animation: appleIconPopAnim 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes appleIconPopAnim {
+  0% {
+    transform: scale(0.5) rotate(-14deg);
+    opacity: 0;
+  }
+  65% {
+    transform: scale(1.22) rotate(4deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.apple-nudge-left {
+  animation: appleNudgeLeftAnim 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.apple-nudge-right {
+  animation: appleNudgeRightAnim 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+@keyframes appleNudgeLeftAnim {
+  0% { transform: scale(1) translateX(0); }
+  45% { transform: scale(0.86) translateX(-5px); }
+  100% { transform: scale(1) translateX(0); }
+}
+
+@keyframes appleNudgeRightAnim {
+  0% { transform: scale(1) translateX(0); }
+  45% { transform: scale(0.86) translateX(5px); }
+  100% { transform: scale(1) translateX(0); }
+}
+
+/* ==========================================================================
+   Apple Music Scrubber Fluid Liquid Shimmer
+   ========================================================================== */
+
+.slider-fill::after,
+.fs-seek-fill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.45) 50%, transparent 100%);
+  transform: translateX(-100%);
+  animation: appleSeekShimmer 2.6s infinite linear;
+  pointer-events: none;
+}
+
+@keyframes appleSeekShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ==========================================================================
+   Apple Music Kinetic Live Synced Lyrics Glow
+   ========================================================================== */
+
+@keyframes appleLyricGlow {
+  0% {
+    filter: drop-shadow(0 0 8px rgba(255, 45, 85, 0.35));
+  }
+  100% {
+    filter: drop-shadow(0 0 22px rgba(255, 45, 85, 0.75));
+  }
+}
+
+/* ==========================================================================
+   Apple Music Mini Player Floating Pulse Feedback
+   ========================================================================== */
+
+.app-player-bar {
+  transition: transform 0.22s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.25s ease;
+}
+
+.app-player-bar .player-left:active {
+  transform: scale(0.985);
+  transition: transform 0.08s ease;
+}
+
+.app-player-bar.is-playing .player-thumb-wrapper {
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.48), 0 0 16px var(--color-accent-glow, rgba(255, 45, 85, 0.35));
+  transition: transform 0.48s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.48s ease;
+}
+
+.app-player-bar.is-paused .player-thumb-wrapper {
+  transform: scale(0.96);
+  box-shadow: none;
+  transition: transform 0.48s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.48s ease;
+}
+
+/* Apple Music Mobile Scrubber Leading Glow Head */
+.mobile-progress-bar {
+  position: relative;
+}
+
+.is-playing .mobile-progress-fill::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  right: -3px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 8px #ffffff, 0 0 14px var(--color-accent, #ff2d55);
+}
+

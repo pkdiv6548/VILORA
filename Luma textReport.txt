@@ -1,0 +1,24 @@
+Report created: 
+	28-07-2022	16:36:03
+
+Project name: Luma text.aep
+
+Source files collected to: 
+	C:\Users\KRN\AppData\Local\Temp\aegraphic\29fb6554-e162-43bf-86ff-ee39b76000e0\collectprj
+
+Source files collected: For target comp
+
+Collected comps:  
+	Murli teaser  Linked Comp 01
+	
+Number of collected files:  0
+
+Size of collected files:  0 KB
+
+Rendering plug-ins:
+	Classic 3D
+	
+Layer:  Text Layer
+	External dependencies:  
+		Font family: “Montserrat”, Font style: “Black”
+
