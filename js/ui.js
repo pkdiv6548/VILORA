@@ -566,16 +566,15 @@ export class UIManager {
               thumbWrap?.addEventListener("mouseleave", () => { overlay.style.opacity = "0"; });
 
               const playThisTrack = () => {
-                state.addToQueueNext(track);
-                const idx = state.queue.findIndex(s => s.id === track.id);
-                if (idx !== -1) {
-                  audioEngine.playTrackAtIndex(idx);
-                } else {
-                  state.setQueue([track, ...state.queue], 0);
-                  audioEngine.playTrackAtIndex(0);
-                }
-                showToast(`Now playing: ${track.title}`);
-              };
+  const idx = state.queue.findIndex(s => s.id === track.id);
+  if (idx !== -1) {
+    audioEngine.playTrackAtIndex(idx);
+  } else {
+    state.setQueue([track, ...state.queue], 0);
+    audioEngine.playTrackAtIndex(0);
+  }
+  showToast(`Now playing: ${track.title}`);
+};
 
               thumbWrap?.addEventListener("click", playThisTrack);
               card.querySelector(".yt-play-btn")?.addEventListener("click", playThisTrack);
