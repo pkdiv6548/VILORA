@@ -793,60 +793,96 @@ class YouTubePlayerService {
       return;
     }
 
-    this.currentVideoId =
-      videoId;
+    const isSameVideo = this.currentVideoId === videoId;
 
-    try {
-      const safeStartTime =
-        Number.isFinite(
+this.currentVideoId =
+  videoId;
+
+try {
+  const safeStartTime =
+    Number.isFinite(
+      Number(startTime)
+    )
+      ? Math.max(
+          0,
           Number(startTime)
         )
-          ? Math.max(
-              0,
-              Number(startTime)
-            )
-          : 0;
+      : 0;
 
-      player.loadVideoById({
-        videoId,
-        startSeconds:
-          safeStartTime
-      });
+  const volume =
+    Math.round(
+      (
+        state.isMuted
+          ? 0
+          : (state.volume ?? 0.85)
+      ) * 100
+    );
 
-      const volume =
-        Math.round(
-          (
-            state.isMuted
-              ? 0
-              : (state.volume ?? 0.85)
-          ) * 100
-        );
+  player.setVolume(
+    Math.max(
+      0,
+      Math.min(100, volume)
+    )
+  );
 
-      player.setVolume(
-        Math.max(
-          0,
-          Math.min(100, volume)
-        )
-      );
+  /*
+   * If this is already the loaded YouTube video,
+   * do NOT reload it. This is important when switching
+   * between audio/video fullscreen views.
+   */
+  if (isSameVideo) {
+    const playerState =
+      typeof player.getPlayerState === "function"
+        ? player.getPlayerState()
+        : null;
 
-      /*
-       * Keep the existing UX responsive while
-       * waiting for the real YouTube state event.
-       */
-      state.isPlaying = true;
-      state.notify(
-        "playbackStateChanged",
-        true
-      );
+    const YTState =
+      window.YT?.PlayerState;
 
-      /*
-       * loadVideoById with autoplay-enabled player
-       * should start playback. Explicit playVideo()
-       * provides an additional request.
-       */
+    if (
+      playerState === YTState?.PAUSED ||
+      playerState === YTState?.CUED ||
+      playerState === YTState?.ENDED ||
+      playerState === -1
+    ) {
       player.playVideo();
+    }
 
-      this.startProgressPolling();
+    state.isPlaying = true;
+    state.notify(
+      "playbackStateChanged",
+      true
+    );
+
+    this.startProgressPolling();
+
+    return;
+  }
+
+  player.loadVideoById({
+    videoId,
+    startSeconds:
+      safeStartTime
+  });
+
+  /*
+   * Keep the existing UX responsive while
+   * waiting for the real YouTube state event.
+   */
+  state.isPlaying = true;
+  state.notify(
+    "playbackStateChanged",
+    true
+  );
+
+  /*
+   * loadVideoById with autoplay-enabled player
+   * should start playback. Explicit playVideo()
+   * provides an additional request.
+   */
+  player.playVideo();
+
+  this.startProgressPolling();
 
       /*
        * If the browser blocks scripted autoplay,
