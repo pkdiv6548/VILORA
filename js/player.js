@@ -374,15 +374,13 @@ export class PlayerController {
     });
 
     this.mobileVideoBtn?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (!this.isYouTubeTrack(state.currentSong)) {
-        showToast("Video option only YouTube songs ke liye available hai");
-        return;
-      }
-      audioEngine.toggleVideoMode();
-      this.openFullscreenPlayer("video");
-    });
-
+  e.stopPropagation();
+  if (!this.isYouTubeTrack(state.currentSong)) {
+    showToast("Video option only YouTube songs ke liye available hai");
+    return;
+  }
+  this.openFullscreenPlayer("video");
+});
     // Video Panel playback controls
     this.fsVideoPlayBtn?.addEventListener("click", () => this.togglePlay());
     this.fsVideoPrevBtn?.addEventListener("click", () => audioEngine.prevTrack());
