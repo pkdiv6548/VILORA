@@ -711,7 +711,7 @@ export class UIManager {
           } else if (sortBy === "album") {
             tracks.sort((a, b) => (a.album || "").localeCompare(b.album || ""));
           } else if (sortBy === "duration") {
-            tracks.sort((a, b) => (b.duration || 0) - (a.duration || 0));
+            tracks.sort((a, b) => (b.duration || 0) - (a.duration || 0)); 
           } else {
             tracks.sort((a, b) => (b.importedAt || 0) - (a.importedAt || 0));
           }
