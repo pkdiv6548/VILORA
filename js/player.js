@@ -1030,7 +1030,7 @@ export class PlayerController {
       this.fsSwitchVideo?.classList.add("active");
 
       // Enable video mode and mount YouTube player in fullscreen video panel
-      audioEngine.enableVideoMode();
+      if (!state.isVideoMode) audioEngine.enableVideoMode();
       youtubePlayer.setFullscreenMount(true);
     } else if (view === "lyrics") {
       this.fsMainBody.classList.remove("view-player", "view-video");
