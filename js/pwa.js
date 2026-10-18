@@ -160,21 +160,19 @@ class PWAManager {
   }
 
   initNetworkListeners() {
+    // Do not show a global offline banner: local music and cached screens remain usable.
+    // Online-only features should report their own network errors at the point of use.
     const banner = document.getElementById("offline-banner");
+    if (banner) banner.style.display = "none";
+
     const updateStatus = () => {
       this.isOnline = navigator.onLine;
-      if (banner) {
-        banner.style.display = this.isOnline ? "none" : "flex";
-      }
-      if (!this.isOnline) {
-        showToast("You are offline. Cached tracks & local files remain playable.");
-      }
+      if (banner) banner.style.display = "none";
     };
 
     window.addEventListener("online", updateStatus);
     window.addEventListener("offline", updateStatus);
     updateStatus();
-  }
-}
+  }}
 
 export const pwaManager = new PWAManager();
