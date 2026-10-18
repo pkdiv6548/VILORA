@@ -843,9 +843,16 @@ export class PlayerController {
       { start: 160, end: 190, boost: 3.25 } // 13: Air & ambience
     ];
 
-    // Ultra-smooth 60fps render loop with liquid spring damping & acoustic harmonic physics
-    const tick = () => {
+    // Keep decorative DOM animation from monopolizing the main thread on mobile.
+    // 30fps is visually smooth for these small bars and leaves more time for audio.
+    let lastRenderAt = 0;
+    const tick = (timestamp) => {
       if (!state.isPlaying) return;
+      if (timestamp - lastRenderAt < 33) {
+        this.eqAnimFrame = requestAnimationFrame(tick);
+        return;
+      }
+      lastRenderAt = timestamp;
 
       try {
         const dataArray = audioEngine.getFrequencyData();
@@ -890,34 +897,34 @@ export class PlayerController {
           });
         }
 
-        // Fullscreen Symmetrical Wave Wings: 14 bars with liquid physics & acoustic harmonic profile
-        const leftWaveBars = document.querySelectorAll("#fs-wave-left .fs-wave-bar");
-        const rightWaveBars = document.querySelectorAll("#fs-wave-right .fs-wave-bar");
+        // The fullscreen wave has no visual value while its modal is closed.
+        // Skip its DOM queries and 28 style writes during normal playback.
+        if (this.fsModal?.classList.contains("open")) {
+          const leftWaveBars = document.querySelectorAll("#fs-wave-left .fs-wave-bar");
+          const rightWaveBars = document.querySelectorAll("#fs-wave-right .fs-wave-bar");
 
-        for (let i = 0; i < 14; i++) {
-          const cfg = bandConfig[i];
-          let bandEnergy = 0;
-          if (hasAudioData && avgEnergy > 2) {
-            let count = 0;
-            for (let b = cfg.start; b <= cfg.end && b < dataArray.length; b++) {
-              bandEnergy += dataArray[b];
-              count++;
+          for (let i = 0; i < 14; i++) {
+            const cfg = bandConfig[i];
+            let bandEnergy = 0;
+            if (hasAudioData && avgEnergy > 2) {
+              let count = 0;
+              for (let b = cfg.start; b <= cfg.end && b < dataArray.length; b++) {
+                bandEnergy += dataArray[b];
+                count++;
+              }
+              if (count > 0) bandEnergy = (bandEnergy / count) / 255;
             }
-            if (count > 0) bandEnergy = (bandEnergy / count) / 255;
+
+            const harmonicFlutter = Math.sin(now * 2.1 + i * 0.52) * 0.16 + Math.cos(now * 1.35 - i * 0.38) * 0.12;
+            const reactivePart = bandEnergy * cfg.boost * 1.15;
+            const target = Math.min(1.42, Math.max(0.22, reactivePart + harmonicFlutter + 0.34));
+            const lerpRate = target > this.waveSmoothed[i] ? 0.34 : 0.16;
+            this.waveSmoothed[i] += (target - this.waveSmoothed[i]) * lerpRate;
+
+            const scaleVal = this.waveSmoothed[i].toFixed(3);
+            if (leftWaveBars[i]) leftWaveBars[i].style.transform = `scaleY(${scaleVal})`;
+            if (rightWaveBars[i]) rightWaveBars[i].style.transform = `scaleY(${scaleVal})`;
           }
-
-          // Liquid multi-harmonic wave flutter to ensure organic motion even during soft passages
-          const harmonicFlutter = Math.sin(now * 2.1 + i * 0.52) * 0.16 + Math.cos(now * 1.35 - i * 0.38) * 0.12;
-          const reactivePart = bandEnergy * cfg.boost * 1.15;
-          const target = Math.min(1.42, Math.max(0.22, reactivePart + harmonicFlutter + 0.34));
-
-          // Spring damping: snappy attack (0.34) for rhythm, silky smooth decay (0.16) for analog feel
-          const lerpRate = target > this.waveSmoothed[i] ? 0.34 : 0.16;
-          this.waveSmoothed[i] += (target - this.waveSmoothed[i]) * lerpRate;
-
-          const scaleVal = this.waveSmoothed[i].toFixed(3);
-          if (leftWaveBars[i]) leftWaveBars[i].style.transform = `scaleY(${scaleVal})`;
-          if (rightWaveBars[i]) rightWaveBars[i].style.transform = `scaleY(${scaleVal})`;
         }
       } catch (e) {}
 
