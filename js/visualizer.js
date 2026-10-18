@@ -91,11 +91,16 @@ export class VisualizerEngine {
   }
 
   render() {
-    if (!this.canvas || !this.ctx) return;
-    const ctx = this.ctx;
-    const width = this.canvas.clientWidth;
-    const height = this.canvas.clientHeight;
+    // The visualizer is not the audio playback path. Avoid expensive canvas work
+    // when its route is hidden/unmounted or the app is backgrounded; this reduces
+    // main-thread contention that can cause local audio to stutter on phones.
+    if (!this.canvas || !this.ctx || document.hidden || !this.canvas.isConnected) return;
+    const rect = this.canvas.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    if (width < 2 || height < 2) return;
 
+    const ctx = this.ctx;
     ctx.clearRect(0, 0, width, height);
 
     const freqData = audioEngine.getFrequencyData();
