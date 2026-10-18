@@ -576,9 +576,24 @@ export class PlayerController {
 
   isYouTubeTrack(song) {
     if (!song) return false;
-    if (song.source === "local" || song.isCustom || song.blobUrl || song.isRadio || song.source === "radio") {
+
+    // Device-imported tracks can have audioUrl/custom metadata without a blobUrl.
+    // Never expose the video toggle for a local track just because it has a
+    // YouTube-looking metadata field or incomplete source classification.
+    const localId = typeof song.id === "string" && song.id.startsWith("local:");
+    if (
+      song.source === "local" ||
+      song.isLocal === true ||
+      song.isCustom ||
+      song.blobUrl ||
+      song.audioUrl ||
+      localId ||
+      song.isRadio ||
+      song.source === "radio"
+    ) {
       return false;
     }
+
     return Boolean(
       song.source === "youtube" ||
       (typeof song.id === "string" && song.id.startsWith("youtube:")) ||
