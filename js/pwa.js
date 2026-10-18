@@ -36,8 +36,9 @@ class PWAManager {
 
       window.addEventListener("load", () => {
         navigator.serviceWorker
-          .register("/sw.js")
+          .register("/sw.js", { updateViaCache: "none" })
           .then((reg) => {
+            reg.update().catch(() => {});
             console.log("Service Worker registered successfully:", reg.scope);
           })
           .catch((err) => {
