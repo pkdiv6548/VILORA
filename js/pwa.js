@@ -160,21 +160,30 @@ class PWAManager {
   }
 
   initNetworkListeners() {
+    // The persistent banner occupied the app header and overlapped mobile content.
+    // Use the existing transient toast instead, once per online/offline transition.
     const banner = document.getElementById("offline-banner");
-    const updateStatus = () => {
+    if (banner) banner.style.display = "none";
+
+    const updateStatus = (showNotice = true) => {
+      const wasOnline = this.isOnline;
       this.isOnline = navigator.onLine;
-      if (banner) {
-        banner.style.display = this.isOnline ? "none" : "flex";
-      }
-      if (!this.isOnline) {
-        showToast("You are offline. Cached tracks & local files remain playable.");
+      if (banner) banner.style.display = "none";
+
+      if (showNotice && wasOnline !== this.isOnline && !this.isOnline) {
+        showToast("You're offline. Local music and saved tracks remain available.", "accent", 2400);
+      } else if (showNotice && wasOnline !== this.isOnline && this.isOnline) {
+        showToast("You're back online.", "accent", 1800);
       }
     };
 
-    window.addEventListener("online", updateStatus);
-    window.addEventListener("offline", updateStatus);
-    updateStatus();
-  }
-}
+    window.addEventListener("online", () => updateStatus(true));
+    window.addEventListener("offline", () => updateStatus(true));
+    updateStatus(false);
+    // If the app is launched while already offline, show one short notice.
+    if (!navigator.onLine) {
+      showToast("You're offline. Local music and saved tracks remain available.", "accent", 2400);
+    }
+  }}
 
 export const pwaManager = new PWAManager();
