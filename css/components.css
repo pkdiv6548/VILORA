@@ -3859,25 +3859,38 @@
 
   .youtube-player-card.in-fullscreen-video .yt-iframe-box {
     position: absolute !important;
-    top: 50% !important;
-    left: 0 !important;
+    inset: 0 !important;
     width: 100vw !important;
-    height: 56.25vw !important;
-    max-height: 100dvh !important;
+    height: 100% !important;
     min-height: 0 !important;
-    transform: translateY(-50%) !important;
+    overflow: hidden !important;
+    transform: none !important;
     margin: 0 !important;
     padding: 0 !important;
     background: #000 !important;
   }
 
-  .youtube-player-card.in-fullscreen-video #youtube-player-mount,
+  /* Reels-style "cover": oversize the 16:9 YouTube iframe to fill a portrait
+     viewport vertically, then crop the left/right edges inside the clipped box.
+     This intentionally crops landscape content rather than showing black bars. */
   .youtube-player-card.in-fullscreen-video .yt-iframe-box iframe {
-    display: block !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: max(100vw, 177.78dvh) !important;
+    height: max(56.25vw, 100dvh) !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    transform: translate(-50%, -50%) !important;
+    border: 0 !important;
+  }
+
+  .youtube-player-card.in-fullscreen-video #youtube-player-mount {
+    position: absolute !important;
+    inset: 0 !important;
     width: 100% !important;
     height: 100% !important;
     min-height: 0 !important;
-    border: 0 !important;
   }
 
   .youtube-player-card.in-fullscreen-video.is-maximized-fullscreen .yt-card-header {
