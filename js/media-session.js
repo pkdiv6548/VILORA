@@ -1,5 +1,6 @@
 import { state } from "./state.js";
 import { audioEngine } from "./audio-engine.js";
+import { storage } from "./storage.js";
 
 export function initMediaSession() {
   if (!("mediaSession" in navigator)) return;
@@ -44,8 +45,11 @@ export function initMediaSession() {
       return;
     }
     if (!state.queue || state.queue.length === 0) {
-      const localTracks = state.currentSong?.source === "local"
-        ? (state.songs || [])
+      const isLocal = state.currentSong?.source === "local" ||
+        state.currentSong?.isCustom ||
+        state.currentSong?.id?.startsWith("local:");
+      const localTracks = isLocal
+        ? (storage.getItem("localMusicLibrary", []) || [])
         : [];
       if (localTracks.length) state.setQueue(localTracks, 0);
     }
