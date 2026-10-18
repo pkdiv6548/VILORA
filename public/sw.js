@@ -1,9 +1,20 @@
 // Service Worker for VIORA PWA — resilient offline app shell
 // Bump this name when the offline shell strategy or precache list changes.
-const CACHE_NAME = "viora-pwa-v2-offline-shell";
+const CACHE_NAME = "viora-pwa-v3-offline-shell";
 const APP_SHELL = [
   "/",
   "/index.html",
+  "/js/app.js",
+  "/js/pwa.js",
+  "/js/state.js",
+  "/js/storage.js",
+  "/js/audio-engine.js",
+  "/js/player-controller.js",
+  "/js/ui.js",
+  "/js/components.js",
+  "/js/visualizer.js",
+  "/js/youtube-player.js",
+  "/js/local-library.js",
   "/icon.svg",
   "/manifest.webmanifest",
   "/icons/icon-192.png",
@@ -74,7 +85,7 @@ self.addEventListener("fetch", (event) => {
     url.searchParams.has("import")
   ) return;
 
-  if (request.mode === "navigate") {
+  if (request.mode === "navigate" || (request.destination === "document" && url.pathname === "/")) {
     event.respondWith((async () => {
       try {
         const response = await fetch(request);
@@ -85,7 +96,7 @@ self.addEventListener("fetch", (event) => {
         }
         return response;
       } catch {
-        const cachedPage = await caches.match(request);
+        const cachedPage = await caches.match(request, { ignoreSearch: true });
         if (cachedPage) return cachedPage;
         const indexPage = await caches.match("/index.html");
         if (indexPage) return indexPage;
