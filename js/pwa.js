@@ -184,6 +184,7 @@ class PWAManager {
     if (!navigator.onLine) {
       showToast("You're offline. Local music and saved tracks remain available.", "accent", 2400);
     }
-  }}
+  }
+}
 
 export const pwaManager = new PWAManager();
