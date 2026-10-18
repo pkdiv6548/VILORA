@@ -173,6 +173,7 @@ class PWAManager {
     window.addEventListener("online", updateStatus);
     window.addEventListener("offline", updateStatus);
     updateStatus();
-  }}
+  }
+}
 
 export const pwaManager = new PWAManager();
