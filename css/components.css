@@ -3823,10 +3823,61 @@
 }
 
 @media (max-width: 768px) {
+  /* In the fullscreen video view, use the full device width and preserve the
+     native 16:9 video ratio instead of constraining it to a small floating card. */
   .youtube-player-card.in-fullscreen-video {
-    width: calc(100vw - 32px) !important;
-    height: calc((100vw - 32px) * 0.5625) !important;
-    max-height: 44vh !important;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 100vw !important;
+    height: 56.25vw !important;
+    max-height: none !important;
+    aspect-ratio: 16 / 9;
+    transform: translate(-50%, -50%) !important;
+    border-radius: 0 !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    z-index: 10020 !important;
+  }
+
+  .youtube-player-card.in-fullscreen-video .yt-card-header {
+    min-height: 40px;
+    height: 40px;
+    padding: 0 12px;
+  }
+
+  .youtube-player-card.in-fullscreen-video .yt-iframe-box,
+  .youtube-player-card.in-fullscreen-video #youtube-player-mount,
+  .youtube-player-card.in-fullscreen-video iframe {
+    width: 100% !important;
+    height: calc(100% - 40px) !important;
+    min-height: 0 !important;
+  }
+
+  .fs-video-actions .fs-switch-audio-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: rgba(18, 20, 30, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  }
+
+  .fs-video-actions .fs-switch-audio-chip svg {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 auto;
   }
 }
 
